@@ -3,12 +3,16 @@
 Accountant is a ClojureScript library to make navigation in single-page
 applications easy.
 
-By default, clicking a link in a ClojureScript application that it's just a
-link to a URL fragment will trigger a full page reload. This obviously defeats
-the purpose of using such an elegant framework as Om, Reagent, et al.
+By default, clicking a link in a ClojureScript application that isn't a simple
+URL fragment will trigger a full page reload. This defeats the purpose of using
+such elegant frameworks as Om, Reagent, et al.
 
 With Accountant, links that correspond to defined Secretary routes trigger
-dispatches to those routes, but don't reload the page.
+dispatches to those routes and update the browser's path, but don't reload the
+page.
+
+Be aware this relies on the browser's HTML5 history, so older browsers will be
+left behind.
 
 ## Installation
 
