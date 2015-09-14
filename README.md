@@ -1,7 +1,7 @@
 # Accountant
 
 Accountant is a ClojureScript library to make navigation in single-page
-applications simple.
+applications simple. It expects you to use [Secretary](https://github.com/gf3/secretary) to define your routes.
 
 By default, clicking a link in a ClojureScript application that isn't a simple
 URL fragment will trigger a full page reload. This defeats the purpose of using
@@ -19,7 +19,7 @@ browsers will be left behind.
 Just add the following to your `project.clj`:
 
 ```clojure
-:dependencies [venantius/accountant "0.1.0"]
+:dependencies [venantius/accountant "0.1.1"]
 ```
 
 ## Usage
@@ -30,7 +30,7 @@ All you have to do to get Accountant working is the following:
 (ns your-app-ns
   (:require [accountant.core :as accountant]))
 
-(accountant/configure)
+(accountant/configure-navigation!)
 ```
 
 ...and you're good to go!

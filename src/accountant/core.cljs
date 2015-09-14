@@ -8,13 +8,13 @@
   (:import goog.history.Html5History
            goog.Uri))
 
-(defn listen [el type]
+(defn- listen [el type]
   (let [out (chan)]
     (events/listen el type
                    (fn [e] (put! out e)))
     out))
 
-(defn dispatch-on-navigate
+(defn- dispatch-on-navigate
   [history]
   (let [navigation (listen history EventType/NAVIGATE)]
     (go
@@ -22,7 +22,7 @@
         (let [token (.-token (<! navigation))]
           (secretary/dispatch! token))))))
 
-(defn find-href
+(defn- find-href
   "Given a DOM element that may or may not be a link, traverse up the DOM tree
   to see if any of its parents are links. If so, return the href content."
   [e]
@@ -32,7 +32,7 @@
         (when-let [parent (.-parentNode e)]
            (recur parent)))) (.-target e)))
 
-(defn prevent-reload-on-known-path
+(defn- prevent-reload-on-known-path
   "Create a click handler that blocks page reloads for known routes in
   Secretary."
   [history]
@@ -47,7 +47,7 @@
          (. history (setToken path title))
          (.preventDefault e))))))
 
-(defn configure
+(defn configure-navigation!
   "Create and configure HTML5 history navigation."
   []
   (let [history (Html5History.)]
