@@ -2,11 +2,14 @@
   "The only namespace in this library."
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [cljs.core.async :refer [put! <! chan]]
+            [clojure.string :as str]
             [secretary.core :as secretary]
             [goog.events :as events]
             [goog.history.EventType :as EventType])
   (:import goog.history.Html5History
            goog.Uri))
+
+(defonce history (Html5History.))
 
 (defn- listen [el type]
   (let [out (chan)]
@@ -50,9 +53,31 @@
 (defn configure-navigation!
   "Create and configure HTML5 history navigation."
   []
-  (let [history (Html5History.)]
-    (.setUseFragment history false)
-    (.setPathPrefix history "")
-    (.setEnabled history true)
-    (dispatch-on-navigate history)
-    (prevent-reload-on-known-path history)))
+  (.setUseFragment history false)
+  (.setPathPrefix history "")
+  (.setEnabled history true)
+  (dispatch-on-navigate history)
+  (prevent-reload-on-known-path history))
+
+(defn map->params [query]
+  (let [params (map #(name %) (keys query))
+        values (vals query)
+        pairs (partition 2 (interleave params values))]
+    (str/join "&" (map #(str/join "=" %) pairs))))
+
+(defn navigate!
+  "add a browser history entry. updates window/location"
+  ([route] (navigate! route {}))
+  ([route query]
+     (let [token (.getToken history)
+           old-route (first (str/split token "?"))
+           query-string (map->params (reduce-kv (fn [valid k v]
+                                                  (if v
+                                                    (assoc valid k v)
+                                                    valid)) {} query))
+           with-params (if (empty? query-string)
+                         route
+                         (str route "?" query-string))]
+       (if (= old-route route)
+         (. history (replaceToken with-params))
+         (. history (setToken with-params))))))
