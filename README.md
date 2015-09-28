@@ -11,6 +11,9 @@ With Accountant, links that correspond to defined Secretary routes will trigger
 dispatches to those routes and update the browser's path, but won't reload the
 page.
 
+Accountant also lets you navigate the app to a new URL directly, rather than through
+a references.
+
 Be aware that Accountant relies on the browser's HTML5 history, so older
 browsers will be left behind.
 
@@ -34,6 +37,12 @@ All you have to do to get Accountant working is the following:
 ```
 
 ...and you're good to go!
+
+You can also use Accountant to set the current path in the browser, e.g.
+
+```clojure
+(accountant/navigate! "/foo/bar/baz")
+```
 
 ## License
 
