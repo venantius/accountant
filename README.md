@@ -12,7 +12,7 @@ dispatches to those routes and update the browser's path, but won't reload the
 page.
 
 Accountant also lets you navigate the app to a new URL directly, rather than through
-a references.
+`<a>` tags.
 
 Be aware that Accountant relies on the browser's HTML5 history, so older
 browsers will be left behind.
