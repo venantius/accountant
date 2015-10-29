@@ -81,3 +81,9 @@
        (if (= old-route route)
          (. history (replaceToken with-params))
          (. history (setToken with-params))))))
+
+(defn dispatch-current! []
+  "Dispatch current URI path."
+  (let [path (-> js/window .-location .-pathname)
+        query (-> js/window .-location .-search)]
+    (secretary/dispatch! (str path query))))
