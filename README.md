@@ -44,6 +44,12 @@ You can also use Accountant to set the current path in the browser, e.g.
 (accountant/navigate! "/foo/bar/baz")
 ```
 
+If you want to dispatch the current path, just add the following:
+
+```clojure
+(dispatch-current!)
+```
+
 ## License
 
 Copyright © 2015 W. David Jarvis
