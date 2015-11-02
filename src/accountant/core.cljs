@@ -28,12 +28,9 @@
   [e]
   ((fn [el]
      (if-let [href (.-href el)]
-       (if-let [target (.-target el)]
-          [href target]
-          (when-let [parent (.-parentNode el)]
-             (recur parent)))
+       [href (.-target el)]
        (when-let [parent (.-parentNode el)]
-             (recur parent)))) (.-target e)))
+         (recur parent)))) (.-target e)))
 
 (defn- locate-route [routes needle]
   (some
