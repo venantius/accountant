@@ -43,10 +43,11 @@
    js/document
    "click"
    (fn [e]
-     (let [href (find-href e)
+     (let [button (.-button e)
+           href (find-href e)
            path (.getPath (.parse Uri href))
            title (.-title (.-target e))]
-       (when (secretary/locate-route path)
+       (when (and (= button 0) (secretary/locate-route path))
          (. history (setToken path title))
          (.preventDefault e))))))
 
