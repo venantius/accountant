@@ -44,10 +44,15 @@
    "click"
    (fn [e]
      (let [button (.-button e)
+           meta-key (.metaKey e)
+           alt-key (.altKey e)
+           ctrl-key (.ctrlKey e)
+           shift-key (.shiftKey e)
+           any-key (or meta-key alt-key ctrl-key shift-key)
            href (find-href e)
            path (.getPath (.parse Uri href))
            title (.-title (.-target e))]
-       (when (and (= button 0) (secretary/locate-route path))
+       (when (and (not any-key) (= button 0) (secretary/locate-route path))
          (. history (setToken path title))
          (.preventDefault e))))))
 
