@@ -29,11 +29,10 @@
   "Given a DOM element that may or may not be a link, traverse up the DOM tree
   to see if any of its parents are links. If so, return the href content."
   [e]
-  ((fn [e]
-     (if-let [href (.-href e)]
-        href
-        (when-let [parent (.-parentNode e)]
-           (recur parent)))) (.-target e)))
+  (if-let [href (.-href e)]
+    href
+    (when-let [parent (.-parentNode e)]
+      (recur parent))))
 
 (defn- prevent-reload-on-known-path
   "Create a click handler that blocks page reloads for known routes in
@@ -43,15 +42,16 @@
    js/document
    "click"
    (fn [e]
-     (let [button (.-button e)
-           meta-key (.metaKey e)
-           alt-key (.altKey e)
-           ctrl-key (.ctrlKey e)
-           shift-key (.shiftKey e)
+     (let [target (.-target e)
+           button (.-button e)
+           meta-key (.-metaKey e)
+           alt-key (.-altKey e)
+           ctrl-key (.-ctrlKey e)
+           shift-key (.-shiftKey e)
            any-key (or meta-key alt-key ctrl-key shift-key)
-           href (find-href e)
+           href (find-href target)
            path (.getPath (.parse Uri href))
-           title (.-title (.-target e))]
+           title (.-title target)]
        (when (and (not any-key) (= button 0) (secretary/locate-route path))
          (. history (setToken path title))
          (.preventDefault e))))))

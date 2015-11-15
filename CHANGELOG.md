@@ -1,3 +1,7 @@
+0.1.5
+ * Internal refactoring
+ * Extended browser event gating for meta key, alt key, ctrl key, shift key, etc.
+
 0.1.4
  * Modify `navigate!` to not suppress browser events when the user tries to open a new tab
 
