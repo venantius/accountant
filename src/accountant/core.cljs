@@ -18,12 +18,13 @@
     out))
 
 (defn- dispatch-on-navigate
-  [history]
+  [history on-before-navigate]
   (let [navigation (listen history EventType/NAVIGATE)]
     (go
       (while true
         (let [token (.-token (<! navigation))]
-          (secretary/dispatch! token))))))
+          (when (on-before-navigate token)
+            (secretary/dispatch! token)))))))
 
 (defn- find-href
   "Given a DOM element that may or may not be a link, traverse up the DOM tree
@@ -58,11 +59,11 @@
 
 (defn configure-navigation!
   "Create and configure HTML5 history navigation."
-  []
+  [& {:keys [on-before-navigate] :or {on-before-navigate (constantly true)}}]
   (.setUseFragment history false)
   (.setPathPrefix history "")
   (.setEnabled history true)
-  (dispatch-on-navigate history)
+  (dispatch-on-navigate history on-before-navigate)
   (prevent-reload-on-known-path history))
 
 (defn map->params [query]

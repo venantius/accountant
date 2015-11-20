@@ -1,4 +1,4 @@
-(defproject venantius/accountant "0.1.5"
+(defproject icm-consulting/accountant "0.1.6-SNAPSHOT"
   :description "Navigation for Single-Page Applications Made Easy."
   :url "http://github.com/venantius/accountant"
   :license {:name "Eclipse Public License"
