@@ -50,6 +50,19 @@ If you want to dispatch the current path, just add the following:
 (dispatch-current!)
 ```
 
+If you need to execute a function prior to the token being dispatched to secretary, add the following option:
+
+```clojure
+(accountant/configure-navigation! :on-before-navigate (fn [token] (println "Navigating to -> " token) true))
+```
+
+You can use the same function to cancel a navigation by returning a falsey value.
+
+```clojure
+(accountant/configure-navigation! :on-before-navigate (constantly false))
+;; navigation events will all be ignored
+```
+
 ## License
 
 Copyright © 2015 W. David Jarvis
