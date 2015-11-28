@@ -6,7 +6,8 @@
             [secretary.core :as secretary]
             [goog.events :as events]
             [goog.history.EventType :as EventType])
-  (:import goog.history.Html5History
+  (:import goog.history.Event
+           goog.history.Html5History
            goog.Uri))
 
 (defonce history (Html5History.))
@@ -34,6 +35,31 @@
     (when-let [parent (.-parentNode e)]
       (recur parent))))
 
+(defn- get-url
+  "Gets the URL for a history token, but without preserving the query string
+  as Google's version incorrectly does. (See https://goo.gl/xwgUos)"
+  [history token]
+  (str (.-pathPrefix_ history) token))
+
+(defn- set-token!
+  "Sets a history token, but without preserving the query string as Google's
+  version incorrectly does. (See https://goo.gl/xwgUos)"
+  [history token title]
+  (let [js-history (.. history -window_ -history)
+        url (get-url history token)]
+    (.pushState js-history nil (or title js/document.title "") url)
+    (.dispatchEvent history (Event. token))))
+
+(defn- uri->query [uri]
+  (let [query (.getQuery uri)]
+    (when-not (empty? query)
+      (str "?" query))))
+
+(defn- uri->fragment [uri]
+  (let [fragment (.getFragment uri)]
+    (when-not (empty? fragment)
+      (str "#" fragment))))
+
 (defn- prevent-reload-on-known-path
   "Create a click handler that blocks page reloads for known routes in
   Secretary."
@@ -50,10 +76,14 @@
            shift-key (.-shiftKey e)
            any-key (or meta-key alt-key ctrl-key shift-key)
            href (find-href target)
-           path (.getPath (.parse Uri href))
+           uri (.parse Uri href)
+           path (.getPath uri)
+           query (uri->query uri)
+           fragment (uri->fragment uri)
+           relative-href (str path query fragment)
            title (.-title target)]
        (when (and (not any-key) (= button 0) (secretary/locate-route path))
-         (. history (setToken path title))
+         (set-token! history relative-href title)
          (.preventDefault e))))))
 
 (defn configure-navigation!
