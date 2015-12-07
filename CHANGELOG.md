@@ -1,3 +1,7 @@
+0.1.6
+ * Fixes a bug where query parameters would persist at different paths.
+ * Adds support for URL hash fragments.
+
 0.1.5
  * Internal refactoring
  * Extended browser event gating for meta key, alt key, ctrl key, shift key, etc.
