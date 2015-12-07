@@ -121,5 +121,6 @@
 (defn dispatch-current! []
   "Dispatch current URI path."
   (let [path (-> js/window .-location .-pathname)
-        query (-> js/window .-location .-search)]
-    (secretary/dispatch! (str path query))))
+        query (-> js/window .-location .-search)
+        hash (-> js/window .-location .-hash)]
+    (secretary/dispatch! (str path query hash))))
