@@ -19,21 +19,31 @@
     out))
 
 (defn- dispatch-on-navigate
-  [history]
+  [secretary-dispatcher history]
   (let [navigation (listen history EventType/NAVIGATE)]
     (go
       (while true
         (let [token (.-token (<! navigation))]
-          (secretary/dispatch! token))))))
+          (secretary-dispatcher token))))))
 
-(defn- find-href
+(defn- find-a
   "Given a DOM element that may or may not be a link, traverse up the DOM tree
-  to see if any of its parents are links. If so, return the href content."
+  to see if any of its parents are links. If so, return the href and the target content."
   [e]
-  (if-let [href (.-href e)]
-    href
-    (when-let [parent (.-parentNode e)]
-      (recur parent))))
+  ((fn [el]
+     (if-let [href (.-href el)]
+       el
+       (if-let [parent (.-parentNode el)]
+         (recur parent)
+         nil))) (.-target e)))
+
+(defn- locate-route [routes needle]
+  "check if route is handled by secretary routes stack"
+  (some
+    (fn [route]
+      (when (secretary/route-matches route needle)
+        route))
+    routes))
 
 (defn- get-url
   "Gets the URL for a history token, but without preserving the query string
@@ -63,37 +73,48 @@
 (defn- prevent-reload-on-known-path
   "Create a click handler that blocks page reloads for known routes in
   Secretary."
-  [history]
+  [routes-stack history]
   (events/listen
    js/document
    "click"
    (fn [e]
-     (let [target (.-target e)
-           button (.-button e)
-           meta-key (.-metaKey e)
-           alt-key (.-altKey e)
-           ctrl-key (.-ctrlKey e)
-           shift-key (.-shiftKey e)
-           any-key (or meta-key alt-key ctrl-key shift-key)
-           href (find-href target)
-           uri (.parse Uri href)
-           path (.getPath uri)
-           query (uri->query uri)
-           fragment (uri->fragment uri)
-           relative-href (str path query fragment)
-           title (.-title target)]
-       (when (and (not any-key) (= button 0) (secretary/locate-route path))
-         (set-token! history relative-href title)
-         (.preventDefault e))))))
+     (let [a-el (find-a e)
+           href (.-href a-el)
+           a-target (.-target a-el)]
+       (if (empty? href)
+         (.preventDefault e) ; prevent any action, probably handled by onClick
+         (let [target (.-target e)
+               button (.-button e)
+               meta-key (.-metaKey e)
+               alt-key (.-altKey e)
+               ctrl-key (.-ctrlKey e)
+               shift-key (.-shiftKey e)
+               any-key (or meta-key alt-key ctrl-key shift-key)
+               uri (.parse Uri href)
+               path (.getPath uri)
+               domain (.getDomain uri)
+               query (uri->query uri)
+               fragment (uri->fragment uri)
+               relative-href (str path query fragment)
+               title (.-title target)]
+           (when (and (not any-key)          ; no special keys where pressed while clicking
+                      (= button 0)           ; is left mouse button click
+                      (or (empty? domain)    ; the domain is empty or is the same of the current domain
+                          (= domain (.. js/window -location -hostname)))
+                      (or (empty? a-target)                  ; the target of the a tag is empty
+                          (= a-target "_self"))              ; or is _self
+                      (locate-route routes-stack path))      ; the path is handled by secretary
+             (set-token! history relative-href title)
+             (.preventDefault e))))))))
 
 (defn configure-navigation!
   "Create and configure HTML5 history navigation."
-  []
+  [secretary-dispatcher routes-stack]
   (.setUseFragment history false)
   (.setPathPrefix history "")
   (.setEnabled history true)
-  (dispatch-on-navigate history)
-  (prevent-reload-on-known-path history))
+  (dispatch-on-navigate secretary-dispatcher history)
+  (prevent-reload-on-known-path routes-stack history))
 
 (defn map->params [query]
   (let [params (map #(name %) (keys query))
@@ -118,9 +139,9 @@
          (. history (replaceToken with-params))
          (. history (setToken with-params))))))
 
-(defn dispatch-current! []
+(defn dispatch-current! [secretary-dispatcher]
   "Dispatch current URI path."
   (let [path (-> js/window .-location .-pathname)
         query (-> js/window .-location .-search)
         hash (-> js/window .-location .-hash)]
-    (secretary/dispatch! (str path query hash))))
+    (secretary-dispatcher (str path query hash))))
