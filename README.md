@@ -74,7 +74,7 @@ If you want to dispatch the current path, just call this function:
 (accountant/dispatch-current! secretary-dispatcher)
 ```
 
-If you do not set the _href_ of an anchor tag accountant won't do nothing, this is used when the action is handled by onClick events.
+If you do not set the _href_ of an anchor tag accountant won't do anything, this is used when the action is handled with onClick.
 
 ```html
 <a onClick="doSomething();">Home</a>
