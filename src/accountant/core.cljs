@@ -81,8 +81,10 @@
            query (uri->query uri)
            fragment (uri->fragment uri)
            relative-href (str path query fragment)
-           title (.-title target)]
-       (when (and (not any-key) (= button 0) (secretary/locate-route path))
+           title (.-title target)
+           host (.getDomain uri)
+           current-host js/window.location.hostname]
+       (when (and (not any-key) (= button 0) (secretary/locate-route path) (= host current-host))
          (set-token! history relative-href title)
          (.preventDefault e))))))
 
