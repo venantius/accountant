@@ -55,6 +55,20 @@ we're about to navigate to. This should return truthy if the path is
 handled by your SPA, because accountant will preventDefault the event, to
 prevent the browser from doing a full page request.
 
+Using secretary, path-exists? would look like:
+
+```clojure
+(fn [path]
+  (secretary/locate-route path))
+```
+
+Using bidi, path-exists? would look like:
+
+```clojure
+(fn [path]
+  (boolean (bidi/match-route app-routes path)))
+```
+
 You can also use Accountant to set the current path in the browser, e.g.
 
 ```clojure
