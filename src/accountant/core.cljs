@@ -3,7 +3,6 @@
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [cljs.core.async :refer [put! <! chan]]
             [clojure.string :as str]
-            [secretary.core :as secretary]
             [goog.events :as events]
             [goog.history.EventType :as EventType])
   (:import goog.history.Event
@@ -19,12 +18,12 @@
     out))
 
 (defn- dispatch-on-navigate
-  [history]
+  [history nav-handler]
   (let [navigation (listen history EventType/NAVIGATE)]
     (go
       (while true
         (let [token (.-token (<! navigation))]
-          (secretary/dispatch! token))))))
+          (nav-handler token))))))
 
 (defn- find-href
   "Given a DOM element that may or may not be a link, traverse up the DOM tree
@@ -61,9 +60,8 @@
       (str "#" fragment))))
 
 (defn- prevent-reload-on-known-path
-  "Create a click handler that blocks page reloads for known routes in
-  Secretary."
-  [history]
+  "Create a click handler that blocks page reloads for known routes"
+  [history path-exists?]
   (events/listen
    js/document
    "click"
@@ -84,18 +82,29 @@
            title (.-title target)
            host (.getDomain uri)
            current-host js/window.location.hostname]
-       (when (and (not any-key) (= button 0) (secretary/locate-route path) (= host current-host))
+       (when (and (not any-key) (= button 0) (path-exists? path) (= host current-host))
          (set-token! history relative-href title)
          (.preventDefault e))))))
 
+(defonce nav-handler nil)
+(defonce path-exists? nil)
+
 (defn configure-navigation!
-  "Create and configure HTML5 history navigation."
-  []
+  "Create and configure HTML5 history navigation.
+
+  nav-handler: a fn of one argument, a path. Called when we've decided
+  to navigate to another page. You'll want to make your app draw the
+  new page here.
+
+  path-exists?: a fn of one argument, a path. Return truthy if this path is handled by the SPA"
+  [{:keys [nav-handler path-exists?]}]
   (.setUseFragment history false)
   (.setPathPrefix history "")
   (.setEnabled history true)
-  (dispatch-on-navigate history)
-  (prevent-reload-on-known-path history))
+  (set! accountant.core/nav-handler nav-handler)
+  (set! accountant.core/path-exists? path-exists?)
+  (dispatch-on-navigate history nav-handler)
+  (prevent-reload-on-known-path history path-exists?))
 
 (defn map->params [query]
   (let [params (map #(name %) (keys query))
@@ -125,4 +134,6 @@
   (let [path (-> js/window .-location .-pathname)
         query (-> js/window .-location .-search)
         hash (-> js/window .-location .-hash)]
-    (secretary/dispatch! (str path query hash))))
+    (if nav-handler
+      (nav-handler (str path query hash))
+      (js/console.error "can't dispatch-current until configure-navigation! called"))))
