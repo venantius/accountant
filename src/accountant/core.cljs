@@ -116,6 +116,7 @@
   "add a browser history entry. updates window/location"
   ([route] (navigate! route {}))
   ([route query]
+   (if nav-handler
      (let [token (.getToken history)
            old-route (first (str/split token "?"))
            query-string (map->params (reduce-kv (fn [valid k v]
@@ -127,7 +128,8 @@
                          (str route "?" query-string))]
        (if (= old-route route)
          (. history (replaceToken with-params))
-         (. history (setToken with-params))))))
+         (. history (setToken with-params))))
+     (js/console.error "can't navigate! until configure-navigation! called"))))
 
 (defn dispatch-current! []
   "Dispatch current URI path."
