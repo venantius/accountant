@@ -1,3 +1,9 @@
+0.1.7
+ * Fixes a bug where accountant wouldn't reload when the target had a different
+ hostname
+ * Removes dependency on Secretary, allowing for use with other routing
+ libraries.
+
 0.1.6
  * Fixes a bug where query parameters would persist at different paths.
  * Adds support for URL hash fragments.
