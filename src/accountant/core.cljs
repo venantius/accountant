@@ -9,7 +9,22 @@
            goog.history.Html5History
            goog.Uri))
 
-(defonce history (Html5History.))
+(defn- transformer-create-url
+  "Replacement createUrl TokenTransformer that avoids preserving the query string,
+  as Google's version incorrectly does. (See https://goo.gl/xwgUos)"
+  [token path-prefix location]
+  (str path-prefix token))
+
+(defn- transformer-retrieve-token
+  "Replacement retrieveToken Token transformer that appends back the hash fragment
+  that gets stripped by the default transformer."
+  [path-prefix location]
+  (str (.-pathname location) (.-hash location)))
+
+(defonce history (let [transformer (goog.history.Html5History.TokenTransformer.)]
+                   (set! (.. transformer -retrieveToken) transformer-retrieve-token)
+                   (set! (.. transformer -createUrl) transformer-create-url)
+                   (Html5History. js/window transformer)))
 
 (defn- listen [el type]
   (let [out (chan)]
@@ -33,21 +48,6 @@
     href
     (when-let [parent (.-parentNode e)]
       (recur parent))))
-
-(defn- get-url
-  "Gets the URL for a history token, but without preserving the query string
-  as Google's version incorrectly does. (See https://goo.gl/xwgUos)"
-  [history token]
-  (str (.-pathPrefix_ history) token))
-
-(defn- set-token!
-  "Sets a history token, but without preserving the query string as Google's
-  version incorrectly does. (See https://goo.gl/xwgUos)"
-  [history token title]
-  (let [js-history (.. history -window_ -history)
-        url (get-url history token)]
-    (.pushState js-history nil (or title js/document.title "") url)
-    (.dispatchEvent history (Event. token))))
 
 (defn- uri->query [uri]
   (let [query (.getQuery uri)]
@@ -83,7 +83,7 @@
            host (.getDomain uri)
            current-host js/window.location.hostname]
        (when (and (not any-key) (= button 0) (path-exists? path) (= host current-host))
-         (set-token! history relative-href title)
+         (. history (setToken relative-href title))
          (.preventDefault e))))))
 
 (defonce nav-handler nil)
