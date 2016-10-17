@@ -27,12 +27,15 @@
 
 (defn- find-href
   "Given a DOM element that may or may not be a link, traverse up the DOM tree
-  to see if any of its parents are links. If so, return the href content."
+  to see if any of its parents are links. If so, return the href content, if it 
+does not have a trueish 'data-no-nav'."
   [e]
-  (if-let [href (.-href e)]
-    href
-    (when-let [parent (.-parentNode e)]
-      (recur parent))))
+  (let [href (.-href e)]
+    (if (and href
+             (not (.getAttribute e "data-no-nav")))
+      href
+      (when-let [parent (.-parentNode e)]
+        (recur parent)))))
 
 (defn- get-url
   "Gets the URL for a history token, but without preserving the query string
