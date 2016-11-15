@@ -9,7 +9,28 @@
            goog.history.Html5History
            goog.Uri))
 
-(defonce history (Html5History.))
+(defn- transformer-create-url
+  "Replacement for googl.history.Html5History.TokenTransformer/createUrl that
+  avoids preserving the query string, as Google's version incorrectly does. See
+  https://groups.google.com/d/msg/closure-library-discuss/jY4yzKX5HYg/Ft1fPEO23r4J
+  for reference."
+  [token path-prefix _]
+  (str path-prefix token))
+
+(defn- transformer-retrieve-token
+  "Replacement for goog.history.Html5History.TokenTransformer/retrieveToken that
+  appends the hash fragment and query string (stripped by default) back to the
+  path. See
+  https://groups.google.com/d/msg/closure-library-discuss/jY4yzKX5HYg/Ft1fPEO23r4J
+  for reference."
+  [path-prefix location]
+  (str (.-pathname location) (.-search location) (.-hash location)))
+
+(defonce history
+  (let [transformer goog.history.Html5History.TokenTransformer.]
+    (set! (.. transformer -retrieveToken) transformer-retrieve-token)
+    (set! (.. transformer -createUrl) transformer-create-url)
+    (Html5History. js/window transformer)))
 
 (defn- listen [el type]
   (let [out (chan)]
@@ -33,21 +54,6 @@
     href
     (when-let [parent (.-parentNode e)]
       (recur parent))))
-
-(defn- get-url
-  "Gets the URL for a history token, but without preserving the query string
-  as Google's version incorrectly does. (See https://goo.gl/xwgUos)"
-  [history token]
-  (str (.-pathPrefix_ history) token))
-
-(defn- set-token!
-  "Sets a history token, but without preserving the query string as Google's
-  version incorrectly does. (See https://goo.gl/xwgUos)"
-  [history token title]
-  (let [js-history (.. history -window_ -history)
-        url (get-url history token)]
-    (.pushState js-history nil (or title js/document.title "") url)
-    (.dispatchEvent history (Event. token))))
 
 (defn- uri->query [uri]
   (let [query (.getQuery uri)]
@@ -89,7 +95,7 @@
                   (= host current-host)
                   (not= current-relative-href relative-href)
                   (path-exists? path))
-         (set-token! history relative-href title)
+         (.setToken history relative-href title)
          (.preventDefault e))))))
 
 (defonce nav-handler nil)
@@ -123,18 +129,18 @@
   ([route] (navigate! route {}))
   ([route query]
    (if nav-handler
-     (let [token (.getToken history)
-           old-route (first (str/split token "?"))
+     (let [token        (.getToken history)
+           old-route    (first (str/split token "?"))
            query-string (map->params (reduce-kv (fn [valid k v]
                                                   (if v
                                                     (assoc valid k v)
                                                     valid)) {} query))
-           with-params (if (empty? query-string)
-                         route
-                         (str route "?" query-string))]
+           with-params  (if (empty? query-string)
+                          route
+                          (str route "?" query-string))]
        (if (= old-route route)
-         (. history (replaceToken with-params))
-         (. history (setToken with-params))))
+         (.replaceToken history with-params)
+         (.setToken history with-params)))
      (js/console.error "can't navigate! until configure-navigation! called"))))
 
 (defn dispatch-current! []
