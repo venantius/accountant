@@ -19,12 +19,12 @@
 
 (defn- transformer-retrieve-token
   "Replacement for goog.history.Html5History.TokenTransformer/retrieveToken that
-  appends the hash fragment (that gets stripped by the default transformer) back
-  to the path. See
+  appends the hash fragment and query string (stripped by default) back to the
+  path. See
   https://groups.google.com/d/msg/closure-library-discuss/jY4yzKX5HYg/Ft1fPEO23r4J
   for reference."
   [path-prefix location]
-  (str (.-pathname location) (.-hash location)))
+  (str (.-pathname location) (.-search location) (.-hash location)))
 
 (defonce history
   (let [transformer goog.history.Html5History.TokenTransformer.]
