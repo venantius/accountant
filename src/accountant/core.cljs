@@ -27,7 +27,7 @@
   (str (.-pathname location) (.-search location) (.-hash location)))
 
 (defonce history
-  (let [transformer goog.history.Html5History.TokenTransformer.]
+  (let [transformer (goog.history.Html5History.TokenTransformer.)]
     (set! (.. transformer -retrieveToken) transformer-retrieve-token)
     (set! (.. transformer -createUrl) transformer-create-url)
     (Html5History. js/window transformer)))
