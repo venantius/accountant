@@ -83,6 +83,11 @@ If you want to dispatch the current path, just add the following:
 
 Note that both `navigate!` and `dispatch-current!` can only be used after calling `configure-navigation!`
 
+Sometimes you may want to use `<a>` elements not as links to other pages but rather as a button, to trigger some action. In these cases, even if a `href` attribute is missing, browsers may use the domain name of the current location as the `href` value. If you want accountant to ignore these non-linking links, add a `data-no-nav` attribute to it like this:
+
+```html
+<a href="" data-no-nav="true" on-click="..." ...>
+```
 ## License
 
 Copyright © 2015 W. David Jarvis
