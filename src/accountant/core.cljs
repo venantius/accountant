@@ -25,14 +25,20 @@
         (let [token (.-token (<! navigation))]
           (nav-handler token))))))
 
+
 (defn- find-href-node
   "Given a DOM element that may or may not be a link, traverse up the DOM tree
-  to see if any of its parents are links. If so, return the node."
+  to see if any of its parents are links. If so, return the href content, if 
+  it does not have an explicit `data-trigger` attribute to signify a non-navigational
+  link element."
   [e]
-  (if (.-href e)
-    e
-    (when-let [parent (.-parentNode e)]
-      (recur parent))))
+  (let [href (.-href e)
+        attrs (.-attributes e)
+        navigation-link? (and href attrs (-> attrs (aget "data-trigger") not))]
+    (if navigation-link?
+      e
+      (when-let [parent (.-parentNode e)]
+        (recur parent)))))
 
 (defn- get-url
   "Gets the URL for a history token, but without preserving the query string
