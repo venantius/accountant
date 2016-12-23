@@ -25,14 +25,20 @@
         (let [token (.-token (<! navigation))]
           (nav-handler token))))))
 
+(defn empty-href? [s]
+  (or (empty? s) (= "#" s)))
+
 (defn- find-href
   "Given a DOM element that may or may not be a link, traverse up the DOM tree
-  to see if any of its parents are links. If so, return the href content."
+  to see if any of its parents are links. If so, return the href content, if 
+  its dom href attribute is neither empty nor \"#\"."
   [e]
-  (if-let [href (.-href e)]
-    href
-    (when-let [parent (.-parentNode e)]
-      (recur parent))))
+  (let [href (.-href e)]
+    (if (and href
+             (-> e .-attributes (aget "href") .-value empty-href? not))
+      href
+      (when-let [parent (.-parentNode e)]
+        (recur parent)))))
 
 (defn- get-url
   "Gets the URL for a history token, but without preserving the query string
