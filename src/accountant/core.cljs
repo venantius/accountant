@@ -25,12 +25,12 @@
         (let [token (.-token (<! navigation))]
           (nav-handler token))))))
 
-(defn- find-href
+(defn- find-href-node
   "Given a DOM element that may or may not be a link, traverse up the DOM tree
-  to see if any of its parents are links. If so, return the href content."
+  to see if any of its parents are links. If so, return the node."
   [e]
-  (if-let [href (.-href e)]
-    href
+  (if (.-href e)
+    e
     (when-let [parent (.-parentNode e)]
       (recur parent))))
 
@@ -73,7 +73,9 @@
            ctrl-key (.-ctrlKey e)
            shift-key (.-shiftKey e)
            any-key (or meta-key alt-key ctrl-key shift-key)
-           href (find-href target)
+           href-node (find-href-node target)
+           href (when href-node (.-href href-node))
+           link-target (when href-node (.-target href-node))
            uri (.parse Uri href)
            path (.getPath uri)
            query (uri->query uri)
@@ -85,6 +87,7 @@
            loc js/window.location
            current-relative-href (str (.-pathname loc) (.-query loc) (.-hash loc))]
        (when (and (not any-key)
+                  (#{"" "_self"} link-target)
                   (= button 0)
                   (= host current-host)
                   (not= current-relative-href relative-href)
