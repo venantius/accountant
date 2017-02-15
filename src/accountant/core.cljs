@@ -81,12 +81,15 @@
            relative-href (str path query fragment)
            title (.-title target)
            host (.getDomain uri)
+           port (.getPort uri)
            current-host js/window.location.hostname
+           current-port js/window.location.port
            loc js/window.location
            current-relative-href (str (.-pathname loc) (.-query loc) (.-hash loc))]
        (when (and (not any-key)
                   (= button 0)
                   (= host current-host)
+                  (= port current-port)
                   (not= current-relative-href relative-href)
                   (path-exists? path))
          (set-token! history relative-href title)
