@@ -22,7 +22,7 @@ browsers will be left behind.
 Just add the following to your `project.clj`:
 
 ```clojure
-:dependencies [venantius/accountant "0.1.7"]
+:dependencies [venantius/accountant "0.1.8"]
 ```
 
 ## Usage
@@ -85,6 +85,6 @@ Note that both `navigate!` and `dispatch-current!` can only be used after callin
 
 ## License
 
-Copyright © 2015 W. David Jarvis
+Copyright © 2017 W. David Jarvis
 
 Distributed under the Eclipse Public License, the same as Clojure.
