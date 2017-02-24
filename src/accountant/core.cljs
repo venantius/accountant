@@ -83,9 +83,9 @@
            relative-href (str path query fragment)
            title (.-title target)
            host (.getDomain uri)
-           port (.getPort uri)
+           port (-> uri .getPort str)
            current-host js/window.location.hostname
-           current-port js/window.location.port
+           current-port (str js/window.location.port)
            loc js/window.location
            current-relative-href (str (.-pathname loc) (.-query loc) (.-hash loc))]
        (when (and (not any-key)

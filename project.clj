@@ -1,4 +1,4 @@
-(defproject venantius/accountant "0.1.8"
+(defproject rocks.clj/accountant "0.1.8"
   :description "Navigation for Single-Page Applications Made Easy."
   :url "http://github.com/venantius/accountant"
   :license {:name "Eclipse Public License"
