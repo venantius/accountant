@@ -1,3 +1,6 @@
+0.1.9
+ * Fixes a bug introduced in 0.1.8 whereby the port wouldn't be properly set on different browsers.
+
 0.1.8
  * Fixes a bug wherein the history duplicates if the relative href is equal to the current active one.
  * Accountant no longer blocks default action when the target is set to something other than "" or "\_self", which means pop-ups are no longer blocked.
