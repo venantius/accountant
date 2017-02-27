@@ -93,10 +93,10 @@
                   (= button 0)
                   (= host current-host)
                   (or (not port)
-                      (= (str port) (str current-port)))
-                  (not= current-relative-href relative-href)
+                      (= (str port) (str current-port)))                  
                   (path-exists? path))
-         (set-token! history relative-href title)
+         (when (not= current-relative-href relative-href) ;; do not add duplicate html5 history state
+           (set-token! history relative-href title))
          (.preventDefault e))))))
 
 (defonce nav-handler nil)
