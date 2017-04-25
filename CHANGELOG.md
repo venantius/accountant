@@ -1,3 +1,6 @@
+0.2.0
+ * Fixes a bug wherein clicking a link to the same page the user was on would trigger a full page refresh.
+
 0.1.9
  * Fixes a bug introduced in 0.1.8 whereby the port wouldn't be properly set on different browsers.
 
