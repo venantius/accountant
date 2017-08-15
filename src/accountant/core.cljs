@@ -1,8 +1,6 @@
 (ns accountant.core
   "The only namespace in this library."
-  (:require-macros [cljs.core.async.macros :refer [go]])
-  (:require [cljs.core.async :refer [put! <! chan]]
-            [clojure.string :as str]
+  (:require [clojure.string :as str]
             [goog.events :as events]
             [goog.history.EventType :as EventType])
   (:import goog.history.Event
@@ -11,19 +9,14 @@
 
 (defonce history (Html5History.))
 
-(defn- listen [el type]
-  (let [out (chan)]
-    (events/listen el type
-                   (fn [e] (put! out e)))
-    out))
-
 (defn- dispatch-on-navigate
   [history nav-handler]
-  (let [navigation (listen history EventType/NAVIGATE)]
-    (go
-      (while true
-        (let [token (.-token (<! navigation))]
-          (nav-handler token))))))
+  (events/listen
+    history
+    EventType/NAVIGATE
+    (fn [e]
+      (let [token (.-token e)]
+        (nav-handler token)))))
 
 (defn- find-href-node
   "Given a DOM element that may or may not be a link, traverse up the DOM tree
