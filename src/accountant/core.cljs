@@ -7,7 +7,18 @@
            goog.history.Html5History
            goog.Uri))
 
-(defonce history (Html5History.))
+(defn- transformer-create-url
+  [token path-prefix location]
+  (str path-prefix token))
+
+(defn- transformer-retrieve-token
+  [path-prefix location]
+  (str (.-pathname location) (.-search location) (.-hash location)))
+
+(defonce history (let [transformer (goog.history.Html5History.TokenTransformer.)]
+                   (set! (.. transformer -retrieveToken) transformer-retrieve-token)
+                   (set! (.. transformer -createUrl) transformer-create-url)
+                   (Html5History. js/window transformer)))
 
 (defn- dispatch-on-navigate
   [history nav-handler]
@@ -26,21 +37,6 @@
     e
     (when-let [parent (.-parentNode e)]
       (recur parent))))
-
-(defn- get-url
-  "Gets the URL for a history token, but without preserving the query string
-  as Google's version incorrectly does. (See https://goo.gl/xwgUos)"
-  [history token]
-  (str (.-pathPrefix_ history) token))
-
-(defn- set-token!
-  "Sets a history token, but without preserving the query string as Google's
-  version incorrectly does. (See https://goo.gl/xwgUos)"
-  [history token title]
-  (let [js-history (.. history -window_ -history)
-        url (get-url history token)]
-    (.pushState js-history nil (or title js/document.title "") url)
-    (.dispatchEvent history (Event. token))))
 
 (defn- uri->query [uri]
   (let [query (.getQuery uri)]
@@ -86,10 +82,10 @@
                   (= button 0)
                   (= host current-host)
                   (or (not port)
-                      (= (str port) (str current-port)))                  
+                      (= (str port) (str current-port)))
                   (path-exists? path))
          (when (not= current-relative-href relative-href) ;; do not add duplicate html5 history state
-           (set-token! history relative-href title))
+           (. history (setToken relative-href title)))
          (.preventDefault e))))))
 
 (defonce nav-handler nil)
