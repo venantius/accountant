@@ -130,7 +130,7 @@
                          (str route "?" query-string))]
        (if (= old-route route)
          (. history (replaceToken with-params))
-         (. history (setToken with-params))))
+         (set-token! history with-params nil)))
      (js/console.error "can't navigate! until configure-navigation! called"))))
 
 (defn dispatch-current! []
