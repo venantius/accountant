@@ -1,3 +1,6 @@
+0.2.1
+ * Fixes a bug around query params and hash fragments due to inproper setup of Html5History.
+
 0.2.0
  * Fixes a bug wherein clicking a link to the same page the user was on would trigger a full page refresh.
 
