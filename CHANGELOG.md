@@ -1,3 +1,7 @@
+0.2.2
+
+ * Ignore links with the `data-trigger` attribute, since they trigger other actions.
+
 0.2.1
  * Fixes a bug around query params and hash fragments due to inproper setup of Html5History.
 

@@ -22,7 +22,7 @@ browsers will be left behind.
 Just add the following to your `project.clj`:
 
 ```clojure
-:dependencies [venantius/accountant "0.2.1"]
+:dependencies [venantius/accountant "0.2.2"]
 ```
 
 ## Usage
