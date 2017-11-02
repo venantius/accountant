@@ -29,6 +29,12 @@
       (let [token (.-token e)]
         (nav-handler token)))))
 
+(defn- get-href-attribute
+  "Given a DOM node, if it is an element node, return its href attribute.
+  Otherwise, return nil."
+  [node]
+  (when (and node (= (.-nodeType node) js/Node.ELEMENT_NODE))
+    (.getAttribute node "href")))
 
 (defn- find-href-node
   "Given a DOM element that may or may not be a link, traverse up the DOM tree
@@ -36,7 +42,7 @@
   it does not have an explicit `data-trigger` attribute to signify a non-navigational
   link element."
   [e]
-  (let [href (.-href e)
+  (let [href (get-href-attribute e)
         attrs (.-attributes e)
         navigation-link? (and href attrs (-> attrs (aget "data-trigger") not))]
     (if navigation-link?
