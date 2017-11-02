@@ -1,9 +1,7 @@
 0.2.3
-
  * Fix page reload blocking for image links on IE11
 
 0.2.2
-
  * Ignore links with the `data-trigger` attribute, since they trigger other actions.
 
 0.2.1
