@@ -83,6 +83,22 @@ If you want to dispatch the current path, just add the following:
 
 Note that both `navigate!` and `dispatch-current!` can only be used after calling `configure-navigation!`
 
+### Caveat: UI Frameworks
+Sometimes links may be used nested within UI components, especially when using third-party wrappers, like [react-bootstrap](https://react-bootstrap.github.io/) etc. These links may have an empty `href` attribute or a value like `#`. Two things might happen: Either, if a route is defined for the root path (i.e. '/' or '/#'), accountant will suppress the browser navigation and dispatch via secretary or the browser will reload the page.
+
+To prevent this accountant looks for an attribute `data-trigger` on every link. The presence of this attribute signals that this link is a means to trigger a callback, not a navigation. If `data-trigger` is defined on a link it gets completely ignored, just like a button.
+
+Example: When using a [DropdownButton](https://react-bootstrap.github.io/components.html#btn-dropdowns) with [MenuItems](https://react-bootstrap.github.io/components.html#menu-items) each item will contain an `<a href="#"...>` element. Since this element can't be replaced, we can at least add arbitrary attributes to it:
+
+```clojure
+(let [dropdown-button (reagent/adapt-react-class js/ReactBootstrap.DropdownButton)
+      menuitem (reagent/adapt-react-class js/ReactBootstrap.MenuItem)]
+  [dropdown-button {:id "foo" :title "..." :onSelect (fn [idx]...)}
+    [menuitem {:id "1"
+               :data-trigger true
+               :eventKey "1"}]
+```
+
 ## License
 
 Copyright © 2017 W. David Jarvis
