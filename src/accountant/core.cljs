@@ -38,7 +38,7 @@
 
 (defn- find-href-node
   "Given a DOM element that may or may not be a link, traverse up the DOM tree
-  to see if any of its parents are links. If so, return the href content, if 
+  to see if any of its parents are links. If so, return the href content, if
   it does not have an explicit `data-trigger` attribute to signify a non-navigational
   link element."
   [e]
@@ -62,7 +62,7 @@
 
 (defn- prevent-reload-on-known-path
   "Create a click handler that blocks page reloads for known routes"
-  [history path-exists?]
+  [history path-exists? reload-same-path?]
   (events/listen
    js/document
    "click"
@@ -98,10 +98,13 @@
                   (path-exists? path))
          (when (not= current-relative-href relative-href) ;; do not add duplicate html5 history state
            (. history (setToken relative-href title)))
-         (.preventDefault e))))))
+         (.preventDefault e)
+         (when reload-same-path?
+           (events/dispatchEvent history (Event. path true))))))))
 
 (defonce nav-handler nil)
 (defonce path-exists? nil)
+(defonce reload-same-path? nil)
 
 (defn configure-navigation!
   "Create and configure HTML5 history navigation.
@@ -111,14 +114,15 @@
   new page here.
 
   path-exists?: a fn of one argument, a path. Return truthy if this path is handled by the SPA"
-  [{:keys [nav-handler path-exists?]}]
+  [{:keys [nav-handler path-exists? reload-same-path?]}]
   (.setUseFragment history false)
   (.setPathPrefix history "")
   (.setEnabled history true)
   (set! accountant.core/nav-handler nav-handler)
   (set! accountant.core/path-exists? path-exists?)
+  (set! accountant.core/reload-same-path? path-exists?)
   (dispatch-on-navigate history nav-handler)
-  (prevent-reload-on-known-path history path-exists?))
+  (prevent-reload-on-known-path history path-exists? reload-same-path?))
 
 (defn map->params [query]
   (let [params (map #(name %) (keys query))
