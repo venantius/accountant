@@ -104,7 +104,6 @@
 
 (defonce nav-handler nil)
 (defonce path-exists? nil)
-(defonce reload-same-path? nil)
 
 (defn configure-navigation!
   "Create and configure HTML5 history navigation.
@@ -120,7 +119,6 @@
   (.setEnabled history true)
   (set! accountant.core/nav-handler nav-handler)
   (set! accountant.core/path-exists? path-exists?)
-  (set! accountant.core/reload-same-path? path-exists?)
   (dispatch-on-navigate history nav-handler)
   (prevent-reload-on-known-path history path-exists? reload-same-path?))
 
