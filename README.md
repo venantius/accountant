@@ -69,9 +69,9 @@ Using bidi, path-exists? would look like:
   (boolean (bidi/match-route app-routes path)))
 ```
 
-By default, clicking a link to the currently active route will not run the
-navigation handler. You can disable this behavior and always run the navigation
-handler by setting `reload-same-path?` to true during configuration.
+By default, clicking a link to the currently active route will not trigger the
+navigation handler. You can disable this behavior and always trigger the
+navigation handler by setting `reload-same-path?` to true during configuration.
 
 ```clojure
 (accountant/configure-navigation! {:nav-handler (fn [path] ...)
