@@ -1,3 +1,6 @@
+0.2.4
+ * Add support for triggering event dispatch when navigating to the same page.
+
 0.2.3
  * Fix page reload blocking for image links on IE11
 
