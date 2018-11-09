@@ -104,6 +104,8 @@
 
 (defonce nav-handler nil)
 (defonce path-exists? nil)
+(defonce document-click-handler-listener-key nil)
+(defonce navigate-listener-key nil)
 
 (defn configure-navigation!
   "Create and configure HTML5 history navigation.
@@ -119,8 +121,19 @@
   (.setEnabled history true)
   (set! accountant.core/nav-handler nav-handler)
   (set! accountant.core/path-exists? path-exists?)
-  (dispatch-on-navigate history nav-handler)
-  (prevent-reload-on-known-path history path-exists? reload-same-path?))
+  (set! document-click-handler-listener-key (dispatch-on-navigate history nav-handler))
+  (set! navigate-listener-key (prevent-reload-on-known-path history path-exists? reload-same-path?)))
+
+(defn unconfigure-navigation!
+  "Teardown HTML5 history navigation.
+
+  Undoes all of the stateful changes, including unlistening to events, that are setup as part of
+  the call to `configure-navigation!`."
+  []
+  (set! nav-handler nil)
+  (set! path-exists? nil)
+  (doseq [key [document-click-handler-listener-key navigate-listener-key]]
+    (when key (events/unlistenByKey key))))
 
 (defn map->params [query]
   (let [params (map #(name %) (keys query))
