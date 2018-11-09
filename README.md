@@ -93,6 +93,14 @@ If you want to dispatch the current path, just add the following:
 
 Note that both `navigate!` and `dispatch-current!` can only be used after calling `configure-navigation!`
 
+To cleanup the resources allocated by `configure-navigation!`, use `unconfigure-navigation!`. This is useful
+in cases where you create a component that manages configuring navigation, and would like to be able to easily
+start/stop it.
+
+```clojure
+(accountant/unconfigure-navigation!)
+```
+
 ### Caveat: UI Frameworks
 Sometimes links may be used nested within UI components, especially when using third-party wrappers, like [react-bootstrap](https://react-bootstrap.github.io/) etc. These links may have an empty `href` attribute or a value like `#`. Two things might happen: Either, if a route is defined for the root path (i.e. '/' or '/#'), accountant will suppress the browser navigation and dispatch via secretary or the browser will reload the page.
 
