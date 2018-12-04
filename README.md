@@ -7,7 +7,7 @@ By default, clicking a link in a ClojureScript application that isn't a simple
 URL fragment will trigger a full page reload. This defeats the purpose of using
 such elegant frameworks as Om, Reagent, et al.
 
-With Accountant, links that correspond to defined Secretary routes will trigger
+With Accountant, links that correspond to defined routes will trigger
 dispatches to those routes and update the browser's path, but won't reload the
 page.
 
