@@ -88,7 +88,7 @@
            current-host js/window.location.hostname
            current-port js/window.location.port
            loc js/window.location
-           current-relative-href (str (.-pathname loc) (.-query loc) (.-hash loc))]
+           current-relative-href (str (.-pathname loc) (.-search loc) (.-hash loc))]
        (when (and (not any-key)
                   (#{"" "_self"} link-target)
                   (= button 0)
