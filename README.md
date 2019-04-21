@@ -33,10 +33,12 @@ All you have to do to get Accountant working is the following:
 (ns your-app-ns
   (:require [accountant.core :as accountant]))
 
-(accountant/configure-navigation! {:nav-handler (fn [path] ...) :path-exists? (fn [path] ...)})
+(accountant/configure-navigation! 
+  {:nav-handler   (fn [path] ...) 
+   :path-exists?  (fn [path] ...)})
 ```
 
-nav-handler is a fn of one argument, the path we're about to navigate to. You'll want to make whatever side-effect you need to render the page here. If you're using secretary, it'd look something like:
+The `:nav-handler` value is a fn of one argument, the path we're about to navigate to. You'll want to make whatever side-effect you need to render the page here. If you're using secretary, it'd look something like:
 
 ```clojure
 (fn [path]
@@ -50,19 +52,19 @@ If you're using bidi + just rendering via react, that might look like:
   (om/update! app [:path] path))
 ```
 
-`path-exists?` is a fn of one argument, a path, that takes the path
-we're about to navigate to. This should return truthy if the path is
-handled by your SPA, because accountant will preventDefault the event, to
+The `:path-exists?` value is a fn of one argument, the path that we're about to navigate to.
+The fn should return truthy if the path is
+handled by your SPA, because accountant will call `event.preventDefault()` to
 prevent the browser from doing a full page request.
 
-Using secretary, path-exists? would look like:
+Using secretary, `:path-exists?` should have a value like:
 
 ```clojure
 (fn [path]
   (secretary/locate-route path))
 ```
 
-Using bidi, path-exists? would look like:
+Using bidi, it would look like:
 
 ```clojure
 (fn [path]
