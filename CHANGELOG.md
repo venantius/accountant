@@ -1,3 +1,6 @@
+0.2.5
+ * Fix a bug in `prevent-reload-on-known-path`
+
 0.2.4
  * Add support for triggering event dispatch when navigating to the same page.
 

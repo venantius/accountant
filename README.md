@@ -22,7 +22,7 @@ browsers will be left behind.
 Just add the following to your `project.clj`:
 
 ```clojure
-:dependencies [venantius/accountant "0.2.4"]
+:dependencies [venantius/accountant "0.2.5"]
 ```
 
 ## Usage
@@ -33,8 +33,8 @@ All you have to do to get Accountant working is the following:
 (ns your-app-ns
   (:require [accountant.core :as accountant]))
 
-(accountant/configure-navigation! 
-  {:nav-handler   (fn [path] ...) 
+(accountant/configure-navigation!
+  {:nav-handler   (fn [path] ...)
    :path-exists?  (fn [path] ...)})
 ```
 
