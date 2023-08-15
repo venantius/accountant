@@ -134,14 +134,21 @@
   []
   (set! nav-handler nil)
   (set! path-exists? nil)
+  (set! pass-map-to-handler? nil)
   (doseq [key [document-click-handler-listener-key navigate-listener-key]]
     (when key (events/unlistenByKey key))))
 
 (defn map->params [query]
-  (let [params (map #(name %) (keys query))
-        values (vals query)
-        pairs (partition 2 (interleave params values))]
-    (str/join "&" (map #(str/join "=" %) pairs))))
+  (if (seq query)
+    (reduce-kv (fn [query-str k v]
+                 (if k
+                   (if query-str
+                     (str query-str "&" (name k) "=" v)
+                     (str (name k) "=" v))
+                   query-str))
+               nil
+               query)
+    ""))
 
 (defn navigate!
   "add a browser history entry. updates window/location"
@@ -150,10 +157,7 @@
    (if nav-handler
      (let [token (.getToken history)
            old-route (first (str/split token "?"))
-           query-string (map->params (reduce-kv (fn [valid k v]
-                                                  (if v
-                                                    (assoc valid k v)
-                                                    valid)) {} query))
+           query-string (map->params query)
            with-params (if (empty? query-string)
                          route
                          (str route "?" query-string))]
