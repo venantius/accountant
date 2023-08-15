@@ -106,6 +106,7 @@
 (defonce path-exists? nil)
 (defonce document-click-handler-listener-key nil)
 (defonce navigate-listener-key nil)
+(defonce pass-map-to-handler? nil)
 
 (defn configure-navigation!
   "Create and configure HTML5 history navigation.
@@ -115,14 +116,15 @@
   new page here.
 
   path-exists?: a fn of one argument, a path. Return truthy if this path is handled by the SPA"
-  [{:keys [nav-handler path-exists? reload-same-path?]}]
+  [{:keys [nav-handler path-exists? reload-same-path? pass-map-to-handler?]}]
   (.setUseFragment history false)
   (.setPathPrefix history "")
   (.setEnabled history true)
   (set! accountant.core/nav-handler nav-handler)
   (set! accountant.core/path-exists? path-exists?)
   (set! document-click-handler-listener-key (dispatch-on-navigate history nav-handler))
-  (set! navigate-listener-key (prevent-reload-on-known-path history path-exists? reload-same-path?)))
+  (set! navigate-listener-key (prevent-reload-on-known-path history path-exists? reload-same-path?))
+  (set! accountant.core/pass-map-to-handler? pass-map-to-handler?))
 
 (defn unconfigure-navigation!
   "Teardown HTML5 history navigation.
@@ -166,5 +168,9 @@
         query (-> js/window .-location .-search)
         hash (-> js/window .-location .-hash)]
     (if nav-handler
-      (nav-handler (str path query hash))
+      (nav-handler (if pass-map-to-handler?
+                     {:path  path
+                      :query query
+                      :hash  hash}
+                     (str path query hash)))
       (js/console.error "can't dispatch-current until configure-navigation! called"))))

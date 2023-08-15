@@ -81,6 +81,13 @@ navigation handler by setting `reload-same-path?` to true during configuration.
                                    :reload-same-path? true})
 ```
 
+By default, a string of the raw URL (`/path?foo=bar#p1`) is passed to the handler. You can
+alternatively pass this as a map, so you don't have to parse it yourself if it fits your needs:
+```clojure
+(accountant/configure-navigation! {...
+                                   :pass-map-to-handler? true}
+```
+
 You can also use Accountant to set the current path in the browser, e.g.
 
 ```clojure
