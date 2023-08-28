@@ -106,6 +106,7 @@
 (defonce path-exists? nil)
 (defonce document-click-handler-listener-key nil)
 (defonce navigate-listener-key nil)
+(defonce pass-map-to-handler? nil)
 
 (defn configure-navigation!
   "Create and configure HTML5 history navigation.
@@ -115,14 +116,15 @@
   new page here.
 
   path-exists?: a fn of one argument, a path. Return truthy if this path is handled by the SPA"
-  [{:keys [nav-handler path-exists? reload-same-path?]}]
+  [{:keys [nav-handler path-exists? reload-same-path? pass-map-to-handler?]}]
   (.setUseFragment history false)
   (.setPathPrefix history "")
   (.setEnabled history true)
   (set! accountant.core/nav-handler nav-handler)
   (set! accountant.core/path-exists? path-exists?)
   (set! document-click-handler-listener-key (dispatch-on-navigate history nav-handler))
-  (set! navigate-listener-key (prevent-reload-on-known-path history path-exists? reload-same-path?)))
+  (set! navigate-listener-key (prevent-reload-on-known-path history path-exists? reload-same-path?))
+  (set! accountant.core/pass-map-to-handler? pass-map-to-handler?))
 
 (defn unconfigure-navigation!
   "Teardown HTML5 history navigation.
@@ -132,14 +134,21 @@
   []
   (set! nav-handler nil)
   (set! path-exists? nil)
+  (set! pass-map-to-handler? nil)
   (doseq [key [document-click-handler-listener-key navigate-listener-key]]
     (when key (events/unlistenByKey key))))
 
 (defn map->params [query]
-  (let [params (map #(name %) (keys query))
-        values (vals query)
-        pairs (partition 2 (interleave params values))]
-    (str/join "&" (map #(str/join "=" %) pairs))))
+  (if (seq query)
+    (reduce-kv (fn [query-str k v]
+                 (if k
+                   (if query-str
+                     (str query-str "&" (name k) "=" v)
+                     (str (name k) "=" v))
+                   query-str))
+               nil
+               query)
+    ""))
 
 (defn navigate!
   "add a browser history entry. updates window/location"
@@ -148,10 +157,7 @@
    (if nav-handler
      (let [token (.getToken history)
            old-route (first (str/split token "?"))
-           query-string (map->params (reduce-kv (fn [valid k v]
-                                                  (if v
-                                                    (assoc valid k v)
-                                                    valid)) {} query))
+           query-string (map->params query)
            with-params (if (empty? query-string)
                          route
                          (str route "?" query-string))]
@@ -166,5 +172,9 @@
         query (-> js/window .-location .-search)
         hash (-> js/window .-location .-hash)]
     (if nav-handler
-      (nav-handler (str path query hash))
+      (nav-handler (if pass-map-to-handler?
+                     {:path  path
+                      :query query
+                      :hash  hash}
+                     (str path query hash)))
       (js/console.error "can't dispatch-current until configure-navigation! called"))))
