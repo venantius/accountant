@@ -85,7 +85,9 @@ By default, a string of the raw URL (`/path?foo=bar#p1`) is passed to the handle
 alternatively pass this as a map, so you don't have to parse it yourself if it fits your needs:
 ```clojure
 (accountant/configure-navigation! {...
-                                   :pass-map-to-handler? true}
+                                   :pass-map-to-handler? true})
+
+=> {:path "/path" :query "?foo=bar" :hash "#p1"}
 ```
 
 You can also use Accountant to set the current path in the browser, e.g.
